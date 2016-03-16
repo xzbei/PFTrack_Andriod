@@ -7,6 +7,7 @@ import org.opencv.android.OpenCVLoader;
 import org.opencv.core.Core;
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.Size;
 import org.opencv.android.CameraBridgeViewBase;
 import org.opencv.android.CameraBridgeViewBase.CvCameraViewListener2;
 import org.opencv.imgproc.Imgproc;
@@ -20,6 +21,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.Button;
+
+import java.util.List;
 
 public class Tutorial2Activity extends Activity implements CvCameraViewListener2 {
     private static final String    TAG = "OCVSample::Activity";
@@ -78,6 +81,9 @@ public class Tutorial2Activity extends Activity implements CvCameraViewListener2
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial2_activity_surface_view);
         mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
+//        List<Size> sizes = mOpenCvCameraView.getSupportedPreviewSizes();
+        mOpenCvCameraView.setMinimumHeight(300);
+        mOpenCvCameraView.setMinimumWidth(300);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
         Mode = MODE_BEGIN;
@@ -150,17 +156,16 @@ public class Tutorial2Activity extends Activity implements CvCameraViewListener2
     public Mat onCameraFrame(CvCameraViewFrame inputFrame) {
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
+        Imgproc.cvtColor(mRgba, mRgba, Imgproc.COLOR_RGBA2RGB);
         Mat mRgbaT = mRgba.t();
-        Core.flip(mRgba.t(), mRgbaT, 1);
-//        Imgproc.resize(mRgbaT, mRgbaT, mRgba.size());
-        Imgproc.resize(mRgbaT, mRgbaT, mRgba.size(),0.01, 0.01, Imgproc.INTER_CUBIC);
-        Mat mGrayT = mGray.t();
-        Core.flip(mGray.t(), mGrayT, 1);
-//        Imgproc.resize(mGrayT, mGrayT, mGray.size());
-        Imgproc.resize(mGrayT, mGrayT, mGray.size(),0.01, 0.01, Imgproc.INTER_CUBIC);
+        Imgproc.resize(mRgbaT, mRgbaT, mRgba.size());
+//        Imgproc.resize(mRgbaT, mRgbaT,new Size() ,0.5, 0.5, Imgproc.INTER_CUBIC);
+        Core.flip(mRgbaT, mRgbaT, 1);
 
-//        Mat mRgbaTT;
-        Imgproc.cvtColor(mRgbaT, mRgbaT, Imgproc.COLOR_RGBA2RGB);
+        Mat mGrayT = mGray.t();
+        Imgproc.resize(mGrayT, mGrayT, mGray.size());
+//        Imgproc.resize(mGrayT, mGrayT, new Size(), 0.5, 0.5, Imgproc.INTER_CUBIC);
+        Core.flip(mGrayT, mGrayT, 1);
 
         final int viewMode = Mode;
         Mode = FindFeatures(mGrayT.getNativeObjAddr(), mRgbaT.getNativeObjAddr(), viewMode);

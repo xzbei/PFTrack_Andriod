@@ -30,9 +30,9 @@
 
 #define TRANS_X_STD /*5.0*/ 5
 #define TRANS_Y_STD /*2.5*/ 2.5
-#define X_init_STD /*5.0*/ 200
-#define Y_init_STD /*2.5*/ 200
-#define TRANS_S_STD 0.001
+#define X_init_STD /*5.0*/ 150
+#define Y_init_STD /*2.5*/ 150
+#define TRANS_S_STD 0.007
 
 /* autoregressive dynamics parameters for transition model */
 #define A1 /* 2.0*/ 2
@@ -51,9 +51,7 @@ particle* init_distribution( CvRect* regions, histogram** histos, int n, int p, 
   
   particles = malloc( p * sizeof( particle ) );
   np = p / n;
-    
-    //printf("regions.x = %f, regions.y = %f\n",regions[i].x,)
-  /* create particles at the centers of each of n regions */
+
   for( i = 0; i < n; i++ )
     {
       width = regions[i].width;

@@ -76,6 +76,8 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
     switch (mode){
         case MODE_BEGIN:
             rectangle(mRgb,Point(ycenter-ycenter/2,xcenter - xcenter/2), Point(ycenter+ycenter/2,xcenter+xcenter/2),Scalar(255,0,0,255),8);
+            __android_log_print(ANDROID_LOG_VERBOSE, "begin","rows  = %d",rows);
+            __android_log_print(ANDROID_LOG_VERBOSE, "begin","cols  = %d",cols);
             return MODE_BEGIN;
             break;
         case MODE_RESET:
