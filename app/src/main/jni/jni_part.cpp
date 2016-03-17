@@ -21,8 +21,8 @@
 
 #define PARTICLES 500
 #define MAX_OBJECTS 1
-#define U0 0.20
-#define U1 0.20
+#define U0 0.5
+#define U1 0.5
 
 #define MODE_RESET 0
 #define MODE_BEGIN 1
@@ -53,7 +53,9 @@ histogram** ref_histos;
 particle* particles, * new_particles;
 CvScalar color;
 CvRect* regions;
+int numframes = 0;
 //CvRect* center_regions;
+double threshold1;
 
 
 extern "C" {
@@ -76,6 +78,7 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
     int i, j, k, w, h, x, y,x1,y1,num,xcenter1,ycenter1,x0,y0,ww,hh;
     int c = 0;
 
+
     IplImage img = (IplImage)mRgb;
     frame = &img;
 
@@ -88,9 +91,11 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
             return MODE_BEGIN;
             break;
         case MODE_RESET:
+            numframes = 0;
             return MODE_BEGIN;
             break;
         case MODE_TRAIN:
+            numframes ++;
             hsv_frame = bgr2hsv(frame);
             CvRect* r;
             r = (CvRect*)malloc( 1 * sizeof( CvRect ) );
@@ -131,7 +136,7 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
             return MODE_TEST;
             break;
         case MODE_TEST:
-
+            numframes ++;
             hsv_frame = bgr2hsv(frame);
             for( j = 0; j < num_particles; j++ )
             {
@@ -177,15 +182,26 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
             y0 = round( center_particle.y - 0.5 * center_particle.s * center_particle.height );
             x1 = x0 + round( center_particle.s * center_particle.width );
             y1 = y0 + round( center_particle.s * center_particle.height );
+            x0 = MAX(0.0,x0);
+            y0 = MAX(0.0,y0);
+            x1 = MIN(frame->width,x1);
+            y1 = MIN(frame->height,y1);
 
             double score1 = likelihood(hsv_frame,cvRound(center_particle.y),cvRound(center_particle.x),cvRound(center_particle.width*center_particle.s),
                                        cvRound(center_particle.height*center_particle.s),center_particle.histo);
             __android_log_print(ANDROID_LOG_VERBOSE, "center_score","score1  = %f",score1);
 
-            if (score1>=THRES)
+            if (numframes == 2){
+                threshold1 = score1*0.2;
                 rectangle( mGr, Point( x0*SCALE, y0*SCALE), Point( x1*SCALE, y1*SCALE ), Scalar(255,0,0,255), 3, 8, 0 );
-            else
-                rectangle( mGr, Point( x0*SCALE, y0*SCALE), Point( x1*SCALE, y1*SCALE ), Scalar(255,255,0,255), 3, 8, 0 );
+            }else {
+                if (score1 >= threshold1)
+                    rectangle(mGr, Point(x0 * SCALE, y0 * SCALE), Point(x1 * SCALE, y1 * SCALE),
+                              Scalar(255, 0, 0, 255), 3, 8, 0);
+                else
+                    rectangle(mGr, Point(x0 * SCALE, y0 * SCALE), Point(x1 * SCALE, y1 * SCALE),
+                              Scalar(255, 255, 0, 255), 3, 8, 0);
+            }
 
             return MODE_TEST;
             break;

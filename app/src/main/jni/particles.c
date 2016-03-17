@@ -30,13 +30,13 @@
 //#define TRANS_Y_STD 0.5
 //#define TRANS_S_STD 0.001
 
-#define TRANS_X_STD /*5.0*/ 20
-#define TRANS_Y_STD /*2.5*/ 20
+#define TRANS_X_STD /*5.0*/ 30
+#define TRANS_Y_STD /*2.5*/ 30
 #define X_init_STD /*5.0*/ 150
 #define Y_init_STD /*2.5*/ 150
 #define TRANS_S_STD 0.05
 
-#define EPSILON 0.000001
+#define EPSILON 2
 
 /* autoregressive dynamics parameters for transition model */
 #define A1 /* 2.0*/ 2
@@ -179,8 +179,6 @@ particle transition( particle p, int w, int h,float U0,float U1, CvRect* regions
         pn.alive = 1;
         pn.x0 = pn.xp = pn.x = rand() % w;
         pn.y0 = pn.yp = pn.y = rand() % h;
-        __android_log_print(ANDROID_LOG_VERBOSE, "getbirth","pn.x0 = %f",pn.x0);
-        __android_log_print(ANDROID_LOG_VERBOSE, "getbirth","pn.y0 = %f",pn.y0);
         pn.x0 = MAX( 0.0, MIN( (float)w - 1.0, pn.x0 ) );
         pn.y0 = MAX( 0.0, MIN( (float)h - 1.0, pn.y0 ) );
         pn.sp = pn.s = 1.0;
@@ -504,11 +502,12 @@ particle Meanshift_cluster( particle* particles, int n, double kernel_bandwidth,
     int i;
     int iter = 0;
     double s = 0;
+    int nums = 3;
 
-    for (i=0;i<3;i++){
+    for (i=0;i<nums;i++){
         s+= particles[i].s;
     }
-    s /= 5;
+    s /= (float)nums;
     center_particle.s = s;
 
     do{
@@ -531,15 +530,9 @@ particle Meanshift_cluster( particle* particles, int n, double kernel_bandwidth,
         center_particle.x += xshift;
         center_particle.y += yshift;
 
-//        center_particle.x = MAX(0.0, MIN(center_particle.x , framewidth - center_particle.s * center_particle.width - 1.0));
-//        center_particle.y = MAX(0.0, MIN(center_particle.y , frameheight - center_particle.s * center_particle.height - 1.0));
-
         meanshift_distance = euclidean_distance(prev_center_p,center_particle);
 
     }while (iter<500 && meanshift_distance > EPSILON);
-
-//    center_particle.x = MAX(0.0, MIN(center_particle.x , framewidth - center_particle.s * center_particle.width - 1.0));
-//    center_particle.y = MAX(0.0, MIN(center_particle.y , frameheight - center_particle.s * center_particle.height - 1.0));
     return center_particle;
 }
 
