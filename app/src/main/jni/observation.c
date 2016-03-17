@@ -27,15 +27,9 @@ IplImage* bgr2hsv( IplImage* bgr )
 {
   IplImage* bgr32f, * hsv;
   int i = 2;
-
-  __android_log_print(ANDROID_LOG_VERBOSE, "before get size ","%d",i);
   bgr32f = cvCreateImage( cvGetSize(bgr), IPL_DEPTH_32F, 3 );
-  __android_log_print(ANDROID_LOG_VERBOSE, "after get size ","%d",bgr->nChannels);
-  __android_log_print(ANDROID_LOG_VERBOSE, "after get size ","%d",bgr32f->nChannels);
   hsv = cvCreateImage( cvGetSize(bgr), IPL_DEPTH_32F, 3 );
-  __android_log_print(ANDROID_LOG_VERBOSE, "before convert ","%d",i);
   cvConvertScale( bgr, bgr32f, 1.0 / 255.0, 0 );
-  __android_log_print(ANDROID_LOG_VERBOSE, "after convert ","%d",i);
   cvCvtColor( bgr32f, hsv, CV_BGR2HSV );
   cvReleaseImage( &bgr32f );
   return hsv;
@@ -309,7 +303,6 @@ int getregions(IplImage* frame, CvRect** regions){
   return 1;
 }
 
-//JNIEXPORT histogram** JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_TEST(JNIEnv*, jobject, jlong addrGray, jlong addrRgba)
 histogram** compute_ref_histos( IplImage* frame, CvRect* regions, int n )
 {
   histogram** histos = malloc( n * sizeof( histogram* ) );

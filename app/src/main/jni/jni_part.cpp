@@ -177,7 +177,7 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
                     }
                 }
 
-            particle center_particle = Meanshift_cluster(particles,num,10,frame->width, frame->height);
+            particle center_particle = Meanshift_cluster(particles,num,80,frame->width, frame->height);
             x0 = round( center_particle.x - 0.5 * center_particle.s * center_particle.width );
             y0 = round( center_particle.y - 0.5 * center_particle.s * center_particle.height );
             x1 = x0 + round( center_particle.s * center_particle.width );

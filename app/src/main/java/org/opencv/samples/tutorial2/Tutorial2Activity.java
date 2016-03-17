@@ -84,10 +84,6 @@ public class Tutorial2Activity extends Activity implements CvCameraViewListener2
 
         mOpenCvCameraView = (CameraBridgeViewBase) findViewById(R.id.tutorial2_activity_surface_view);
         mOpenCvCameraView.setVisibility(CameraBridgeViewBase.VISIBLE);
-//        mOpenCvCameraView.setMinimumWidth(300);
-//        mOpenCvCameraView.setMinimumHeight(300);
-
-//        mOpenCvCameraView.setMaxFrameSize(500, 500);
         mOpenCvCameraView.setCvCameraViewListener(this);
 
         Mode = MODE_BEGIN;
@@ -161,33 +157,15 @@ public class Tutorial2Activity extends Activity implements CvCameraViewListener2
         mRgba = inputFrame.rgba();
         mGray = inputFrame.gray();
         Imgproc.cvtColor(mRgba, mRgba, Imgproc.COLOR_RGBA2RGB);
-
-
-//
         Mat mRgbaT = mRgba.t();
         Core.flip(mRgbaT, mRgbaT, 1);
-//        Imgproc.resize(mRgbaT, mRgbaT, mRgba.t().size());
         Size a = mRgba.t().size();
-//        a.height = (int)a.height / 2;
-//        a.width = (int)a.width / 2;
         Imgproc.resize(mRgbaT, mRgbaT,a);
-
         Size dsize = new Size(mRgbaT.width()/3,mRgbaT.height()/3);
-
         Mat mRgbaResize = new Mat(dsize,CvType.CV_8UC3);
         Imgproc.resize(mRgbaT,mRgbaResize,dsize);
-
-//        Mat mGrayT = mGray.t();
-//        Core.flip(mGrayT, mGrayT, 1);
-//        a = mGrayT.t().size();
-////        a.height = (int)a.height / 2;
-////        a.width = (int)a.width / 2;
-////        Imgproc.resize(mGrayT, mGrayT, mGray.t().size());
-//        Imgproc.resize(mGrayT, mGrayT, a);
-
         final int viewMode = Mode;
         Mode = FindFeatures(mRgbaT.getNativeObjAddr(), mRgbaResize.getNativeObjAddr(), viewMode);
-
         return mRgbaT;
     }
 //

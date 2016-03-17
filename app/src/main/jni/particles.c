@@ -128,7 +128,6 @@ double gaussrand(double E, double V)
     static double V1, V2, S;
     static int phase = 0;
     double X;
-
     if ( phase == 0 ) {
         do {
             double U1 = (double)rand() / RAND_MAX;
@@ -142,11 +141,8 @@ double gaussrand(double E, double V)
         X = V1 * sqrt(-2 * log(S) / S);
     } else
         X = V2 * sqrt(-2 * log(S) / S);
-
     phase = 1 - phase;
-
     X = X * V + E;
-
     return X;
 }
 
@@ -167,14 +163,10 @@ particle transition( particle p, int w, int h,float U0,float U1, CvRect* regions
 //    srand(time(0));
   float x, y, s;
   particle pn;
-//    float temp;
     int width,height;
     width = regions[0].width;
     height = regions[0].height;
 
-//    __android_log_print(ANDROID_LOG_VERBOSE, "tranision step: begin","U0 = %f",U0);
-    
-//    temp = rand()/(float)(RAND_MAX);
     if (p.alive ==0 && (rand()/(float)(RAND_MAX))<=U0){
         pn.alive = 1;
         pn.x0 = pn.xp = pn.x = rand() % w;
@@ -211,7 +203,6 @@ particle transition( particle p, int w, int h,float U0,float U1, CvRect* regions
 
     }
     else {
-//        __android_log_print(ANDROID_LOG_VERBOSE, "tranision step: dead","p.alive ==%d",p.alive);
         pn.x0 = pn.xp = pn.x = 0.0;
         pn.y0 = pn.yp = pn.y = 0.0;
         pn.sp = pn.s = 0.0;
