@@ -62,6 +62,10 @@ int particle_cmp(const void *p1, const void *p2);
 int particle_cmp2(const void *p1, const void *p2);
 //void display_particle(Mat mRgb, particle p, CvScalar color);
 int calculate_alive(particle *particles, int n);
+double euclidean_distance(particle p1, particle p2);
+double gaussian_kernel(double distance, double kernel_bandwidth);
+particle Meanshift_cluster( particle* particles, int n, double kernel_bandwidth,int framewidth, int frameheight);
+
 
 #ifdef __cplusplus
 }

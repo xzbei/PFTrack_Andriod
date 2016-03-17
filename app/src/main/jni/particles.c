@@ -14,6 +14,8 @@
 //#include <gsl/gsl_rng.h>
 #include "time.h"
 #include <android/log.h>
+#include <stdio.h>
+#include <math.h>
 //
 //#define TRANS_XX_STD 10
 //#define TRANS_YY_STD 5
@@ -28,11 +30,13 @@
 //#define TRANS_Y_STD 0.5
 //#define TRANS_S_STD 0.001
 
-#define TRANS_X_STD /*5.0*/ 5
-#define TRANS_Y_STD /*2.5*/ 2.5
+#define TRANS_X_STD /*5.0*/ 20
+#define TRANS_Y_STD /*2.5*/ 20
 #define X_init_STD /*5.0*/ 150
 #define Y_init_STD /*2.5*/ 150
-#define TRANS_S_STD 0.007
+#define TRANS_S_STD 0.05
+
+#define EPSILON 0.000001
 
 /* autoregressive dynamics parameters for transition model */
 #define A1 /* 2.0*/ 2
@@ -175,6 +179,8 @@ particle transition( particle p, int w, int h,float U0,float U1, CvRect* regions
         pn.alive = 1;
         pn.x0 = pn.xp = pn.x = rand() % w;
         pn.y0 = pn.yp = pn.y = rand() % h;
+        __android_log_print(ANDROID_LOG_VERBOSE, "getbirth","pn.x0 = %f",pn.x0);
+        __android_log_print(ANDROID_LOG_VERBOSE, "getbirth","pn.y0 = %f",pn.y0);
         pn.x0 = MAX( 0.0, MIN( (float)w - 1.0, pn.x0 ) );
         pn.y0 = MAX( 0.0, MIN( (float)h - 1.0, pn.y0 ) );
         pn.sp = pn.s = 1.0;
@@ -185,18 +191,12 @@ particle transition( particle p, int w, int h,float U0,float U1, CvRect* regions
         pn.w = 0;
     }
     else if (p.alive == 1 && (rand()/(float)(RAND_MAX))<=1-U1){
-//        x = 2 * ( p.x - p.xp ) + 1 * ( p.xp - p.x0 ) +
-//        B0 * gsl_ran_gaussian( rng, TRANS_X_STD ) + p.x0;
         x = 2 * ( p.x - p.xp ) + 1 * ( p.xp - p.x0 ) +
             B0 * gaussrand(0, TRANS_X_STD) + p.x0;
         pn.x = MAX( 0.0, MIN( (float)w - 1.0, x ) );
-//        y = 2 * ( p.y - p.yp ) + 1 * ( p.yp - p.y0 ) +
-//        B0 * gsl_ran_gaussian( rng, TRANS_Y_STD ) + p.y0;
         y = 2 * ( p.y - p.yp ) + 1 * ( p.yp - p.y0 ) +
             B0 * gaussrand(0, TRANS_Y_STD) + p.y0;
         pn.y = MAX( 0.0, MIN( (float)h - 1.0, y ) );
-//        s = A1 * ( p.s - 1.0 ) + A2 * ( p.sp - 1.0 ) +
-//        B0 * gsl_ran_gaussian( rng, TRANS_S_STD ) + 1.0;
         s = A1 * ( p.s - 1.0 ) + A2 * ( p.sp - 1.0 ) +
             B0 * gaussrand(0, TRANS_S_STD) + 1.0;
         pn.s = MAX( 0.1, s );
@@ -396,6 +396,9 @@ particle* resample3( particle* particles, int n ,int num_particles)
         }
         i++;
     }
+//    for (i=n;i<num_particles;i++){
+//        new_particles[i].w = 0;
+//    }
     return new_particles;
 }
 
@@ -475,3 +478,68 @@ int calculate_alive(particle* particles,int n){
             num++;
     return num;
 }
+
+//mean_shift
+
+double euclidean_distance(particle p1, particle p2){
+    double total = 0;
+    total += (p1.x - p2.x) * (p1.x - p2.x);
+    total += (p1.y - p2.y) * (p1.y - p2.y);
+    return sqrt(total);
+}
+
+double gaussian_kernel(double distance, double kernel_bandwidth){
+    double temp =  exp(-(distance*distance) / (kernel_bandwidth));
+    return temp;
+}
+
+particle Meanshift_cluster( particle* particles, int n, double kernel_bandwidth,int framewidth, int frameheight){
+    //n: size of particles
+
+    particle center_particle = particles[0];
+    particle prev_center_p;
+    double meanshift_distance;
+    double total_weight;
+    double xshift,yshift;
+    int i;
+    int iter = 0;
+    double s = 0;
+
+    for (i=0;i<3;i++){
+        s+= particles[i].s;
+    }
+    s /= 5;
+    center_particle.s = s;
+
+    do{
+        iter ++;
+        prev_center_p = center_particle;
+        meanshift_distance = EPSILON + 1.0;
+        xshift = 0.0;
+        yshift = 0.0;
+        total_weight = 0.0;
+        for(i = 0;i < n; i++){
+            double distance = euclidean_distance(particles[i],center_particle);
+            double weight = gaussian_kernel(distance,kernel_bandwidth);
+            xshift += weight*(particles[i].x - center_particle.x);
+            yshift += weight*(particles[i].y - center_particle.y);
+            total_weight +=weight;
+        }
+        xshift /= total_weight;
+        yshift /= total_weight;
+
+        center_particle.x += xshift;
+        center_particle.y += yshift;
+
+//        center_particle.x = MAX(0.0, MIN(center_particle.x , framewidth - center_particle.s * center_particle.width - 1.0));
+//        center_particle.y = MAX(0.0, MIN(center_particle.y , frameheight - center_particle.s * center_particle.height - 1.0));
+
+        meanshift_distance = euclidean_distance(prev_center_p,center_particle);
+
+    }while (iter<500 && meanshift_distance > EPSILON);
+
+//    center_particle.x = MAX(0.0, MIN(center_particle.x , framewidth - center_particle.s * center_particle.width - 1.0));
+//    center_particle.y = MAX(0.0, MIN(center_particle.y , frameheight - center_particle.s * center_particle.height - 1.0));
+    return center_particle;
+}
+
