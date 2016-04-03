@@ -66,9 +66,6 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
     Mat& mGr  = *(Mat*)addrGray;
     Mat& mRgb = *(Mat*)addrRgba;
 
-//    Mat& dst;
-//    resize(mRgb, mRgb, Size(), 0.1, 0.1, INTER_CUBIC);
-
     int rows = mRgb.rows;
     int cols = mRgb.cols;
     int xcenter = rows/2;
@@ -85,9 +82,6 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
     switch (mode){
         case MODE_BEGIN:
             rectangle(mGr,Point((ycenter-ycenter/2)*SCALE,(xcenter - xcenter/2)*SCALE), Point((ycenter+ycenter/2)*SCALE,(xcenter+xcenter/2)*SCALE),Scalar(255,0,0,255),8);
-//            __android_log_print(ANDROID_LOG_VERBOSE, "begin","rows  = %d",rows);
-//            __android_log_print(ANDROID_LOG_VERBOSE, "begin","cols  = %d",cols);
-//            __android_log_print(ANDROID_LOG_VERBOSE, "begin","frame_width  = %d",frame->width);
             return MODE_BEGIN;
             break;
         case MODE_RESET:
@@ -120,7 +114,6 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
                 for( j = num_particles - 1; j > 0; j-- )
                 {
                     color = CV_RGB(255,255,0);
-//                    display_particle( mRgb, particles[j], color );
                     x0 = round( particles[j].x - 0.5 * particles[j].s * particles[j].width );
                     y0 = round( particles[j].y - 0.5 * particles[j].s * particles[j].height );
                     x1 = x0 + round( particles[j].s * particles[j].width );
@@ -129,10 +122,8 @@ JNIEXPORT int JNICALL Java_org_opencv_samples_tutorial2_Tutorial2Activity_FindFe
                     ycenter1 = (y1 - y0)/2 -1;
                     rectangle( mGr, Point( (x0+xcenter1)*SCALE, (y0+ycenter1)*SCALE), Point( (x1-xcenter1)*SCALE, (y1-ycenter1)*SCALE ), color, 3, 8, 0 );
                 }
-//            __android_log_print(ANDROID_LOG_VERBOSE, "show_all","mode  = %d",mode);
 //            cvReleaseImage( &hsv_frame );
 //            cvReleaseImage( &frame );
-//            __android_log_print(ANDROID_LOG_VERBOSE, "release","mode  = %d",mode);
             return MODE_TEST;
             break;
         case MODE_TEST:
